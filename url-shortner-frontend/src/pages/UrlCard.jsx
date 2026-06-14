@@ -1,89 +1,84 @@
-import { useState } from "react";
-import { getAnalytics } from "../api/api";
+import { ExternalLink, Copy, Trash2, CheckCircle, XCircle, MousePointer } from "lucide-react";
 
 function formatDate(iso) {
-  return new Date(iso).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  if (!iso) return "";
+  try {
+    return new Date(iso).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return "";
+  }
 }
 
-function truncate(str, max = 55) {
-  return str.length > max ? str.slice(0, max) + "…" : str;
-}
-
-export default function UrlCard({ url, onClicksUpdate }) {
-  const [copied, setCopied] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-
-  async function handleCopy() {
-    await navigator.clipboard.writeText(url.shortUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
-  async function handleOpen() {
-    window.open(url.shortUrl, "_blank");
-
-    // Wait for backend redirect to register the click, then re-fetch
-    setRefreshing(true);
-    setTimeout(async () => {
-      try {
-        const shortCode = url.shortUrl.split("/").pop();
-        const analytics = await getAnalytics(shortCode);
-        onClicksUpdate(url.id, analytics.clickCount);
-      } catch (error) {
-        console.error("Failed to refresh analytics:", error);
-      } finally {
-        setRefreshing(false);
-      }
-    }, 1500);
-  }
-
+export default function UrlCard({ url, onDelete, onIncrementClick, onCopy }) {
   return (
-    <div className="bg-white border border-zinc-200 rounded-2xl p-5 flex flex-col gap-3">
+      <div className="group rounded-xl border border-zinc-200 bg-white px-4 py-3.5 transition-colors hover:border-zinc-300">
 
-      {/* TOP */}
-      <div className="flex items-start justify-between gap-3">
+        {/* Top row */}
+        <div className="flex items-start justify-between gap-3 mb-2.5">
+          <div className="flex-1 min-w-0">
+            <button
+                onClick={onIncrementClick}
+                className="flex items-center gap-1.5 text-[14px] font-medium text-indigo-500 hover:text-indigo-600 transition-colors truncate max-w-full"
+            >
+              <ExternalLink size={13} strokeWidth={2} />
+              <span className="truncate">{url.shortUrl}</span>
+            </button>
+            <p className="mt-0.5 text-[12px] text-zinc-400 font-mono truncate">
+              {url.originalUrl}
+            </p>
+          </div>
 
-        {/* URL INFO */}
-        <div className="flex flex-col gap-1 overflow-hidden flex-1">
-          <button
-            onClick={handleOpen}
-            className="text-[15px] font-medium text-zinc-900 hover:underline text-left truncate"
-          >
-            {url.shortUrl}
-          </button>
-          <span className="text-sm text-zinc-500 break-all" title={url.originalUrl}>
-            {truncate(url.originalUrl)}
-          </span>
+          {/* Action buttons */}
+          <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+                onClick={onCopy}
+                className="w-[30px] h-[30px] flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-colors"
+                title="Copy short URL"
+            >
+              <Copy size={13} strokeWidth={2} />
+            </button>
+            <button
+                onClick={() => onDelete(url.id)}
+                className="w-[30px] h-[30px] flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-500 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
+                title="Delete"
+            >
+              <Trash2 size={13} strokeWidth={2} />
+            </button>
+          </div>
         </div>
 
-        {/* COPY */}
-        <button
-          onClick={handleCopy}
-          className="text-sm px-3 py-1.5 rounded-xl border border-zinc-200 bg-transparent text-zinc-900 hover:bg-zinc-100 transition flex-shrink-0"
-        >
-          {copied ? "✓ Copied" : "Copy"}
-        </button>
-      </div>
-
-      {/* FOOTER */}
-      <div className="flex items-center gap-3 pt-3 border-t border-zinc-100 flex-wrap">
-        <div className="flex items-baseline gap-1">
-          <span className="text-2xl font-medium tracking-tight text-zinc-900">
-            {(url.clicks || 0).toLocaleString()}
-          </span>
-          <span className="text-xs text-zinc-500">
-            {refreshing ? "refreshing…" : "clicks"}
-          </span>
-        </div>
-
-        <span className="text-xs text-zinc-400 ml-auto">
-          Created {formatDate(url.createdAt)}
+        {/* Bottom row */}
+        <div className="flex items-center gap-2">
+          {/* Click count */}
+          <span className="inline-flex items-center gap-1 text-[11px] text-zinc-500 bg-zinc-100 rounded-full px-2.5 py-0.5">
+          <MousePointer size={10} strokeWidth={2} />
+            {url.clicks || 0} click{(url.clicks || 0) === 1 ? "" : "s"}
         </span>
+
+          {/* Active status */}
+          {url.active !== false ? (
+              <span className="inline-flex items-center gap-1 text-[11px] text-indigo-600 bg-indigo-50 rounded-full px-2.5 py-0.5">
+            <CheckCircle size={10} strokeWidth={2} />
+            active
+          </span>
+          ) : (
+              <span className="inline-flex items-center gap-1 text-[11px] text-zinc-400 bg-zinc-100 rounded-full px-2.5 py-0.5">
+            <XCircle size={10} strokeWidth={2} />
+            inactive
+          </span>
+          )}
+
+          {/* Date */}
+          {url.createdAt && (
+              <span className="ml-auto text-[11px] text-zinc-400">
+            {formatDate(url.createdAt)}
+          </span>
+          )}
+        </div>
       </div>
-    </div>
   );
 }

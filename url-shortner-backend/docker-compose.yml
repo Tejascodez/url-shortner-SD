@@ -1,19 +1,22 @@
 services:
-
-  postgres:
-    image: postgres:16
-    container_name: url-shortener-db
-
-    environment:
-      POSTGRES_DB: url_shortener
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+  backend:
+    build: .
+    container_name: url-shortener-backend
 
     ports:
-      - "5433:5432"
+      - "8080:8080"
 
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
 
-volumes:
-  postgres_data:
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7
+    container_name: url-shortener-redis
+
+    ports:
+      - "6380:6379"
+
+    restart: unless-stopped

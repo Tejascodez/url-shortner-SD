@@ -2,13 +2,7 @@ package com.tejas.url_shortner.entity;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -19,6 +13,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class Url {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,6 +26,7 @@ public class Url {
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
     private LocalDateTime expiresAt;
 
     @Column(nullable = false)
@@ -39,12 +35,14 @@ public class Url {
     @Column(nullable = false)
     private boolean isActive;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @PrePersist
-    public void PrePersist(){
+    public void prePersist() {
         this.createdAt = LocalDateTime.now();
         this.clickCount = 0L;
         this.isActive = true;
     }
-
 }

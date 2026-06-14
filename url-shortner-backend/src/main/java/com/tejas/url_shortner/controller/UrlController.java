@@ -1,6 +1,7 @@
 package com.tejas.url_shortner.controller;
 
 import java.net.URI;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import com.tejas.url_shortner.dto.request.ShortenRequest;
 import com.tejas.url_shortner.dto.response.ShortenResponse;
 import com.tejas.url_shortner.dto.response.UrlAnalyticsResponse;
+import com.tejas.url_shortner.entity.Url;
 import com.tejas.url_shortner.service.UrlService;
 
 import jakarta.validation.Valid;
@@ -49,8 +51,7 @@ public class UrlController {
 
     // GET URL ANALYTICS
     @GetMapping("/api/url/{shortCode}/analytics")
-    public ResponseEntity<UrlAnalyticsResponse>
-    getAnalytics(
+    public ResponseEntity<UrlAnalyticsResponse> getAnalytics(
             @PathVariable String shortCode
     ) {
 
@@ -58,5 +59,14 @@ public class UrlController {
                 urlService.getAnalytics(shortCode);
 
         return ResponseEntity.ok(response);
+    }
+
+    // GET LOGGED-IN USER URLS
+    @GetMapping("/api/url/my-urls")
+    public ResponseEntity<List<Url>> getMyUrls() {
+
+        return ResponseEntity.ok(
+                urlService.getMyUrls()
+        );
     }
 }
