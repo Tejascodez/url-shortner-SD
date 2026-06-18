@@ -1,4 +1,6 @@
-# URL Shortener
+## Architecture
+
+![URL Shortener Architecture](assets/architecture.png)
 
 A full-stack URL shortener built with Spring Boot, React, PostgreSQL, Redis, and Docker.
 
