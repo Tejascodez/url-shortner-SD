@@ -1,6 +1,7 @@
 ## Architecture
-
-![URL Shortener Architecture](assets/architecture.png)
+<p align="center">
+  <img src="assets/image.png" width="700">
+</p>
 
 A full-stack URL shortener built with Spring Boot, React, PostgreSQL, Redis, and Docker.
 
